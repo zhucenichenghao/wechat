@@ -31,7 +31,7 @@ func (miniProgram *MiniProgram) GetAccessToken() (string, error) {
 	if miniProgram.authorizerRefreshToken == "" {
 		return "", fmt.Errorf("please set the authorizer_refresh_token first")
 	}
-	akRes, akResErr := miniProgram.GetComponent().RefreshAuthrToken(miniProgram.AppID, miniProgram.authorizerRefreshToken)
+	akRes, akResErr := miniProgram.openContext.RefreshAuthrToken(miniProgram.AppID, miniProgram.authorizerRefreshToken)
 	if akResErr != nil {
 		return "", akResErr
 	}
@@ -47,7 +47,7 @@ func (miniProgram *MiniProgram) GetAccessTokenContext(ctx originalContext.Contex
 	if miniProgram.authorizerRefreshToken == "" {
 		return "", fmt.Errorf("please set the authorizer_refresh_token first")
 	}
-	akRes, akResErr := miniProgram.GetComponent().RefreshAuthrTokenContext(ctx, miniProgram.AppID, miniProgram.authorizerRefreshToken)
+	akRes, akResErr := miniProgram.openContext.RefreshAuthrTokenContext(ctx, miniProgram.AppID, miniProgram.authorizerRefreshToken)
 	if akResErr != nil {
 		return "", akResErr
 	}
