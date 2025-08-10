@@ -69,8 +69,9 @@ func NewOfficialAccount(opCtx *opContext.Context, appID string) *OfficialAccount
 		Cache:          opCtx.Cache,
 	})
 	// 设置获取access_token的函数
-	officialAccount.SetAccessTokenHandle(NewDefaultAuthrAccessToken(opCtx, appID))
-	return &OfficialAccount{AppID: appID, OfficialAccount: officialAccount, openContext: opCtx}
+	ret := &OfficialAccount{AppID: appID, OfficialAccount: officialAccount, openContext: opCtx}
+	officialAccount.SetAccessTokenHandle(ret)
+	return ret
 }
 
 // PlatformOauth 平台代发起oauth2网页授权
