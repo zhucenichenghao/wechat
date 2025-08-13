@@ -154,7 +154,8 @@ func (ctx *Context) GetBindComponentURLV2(redirectURI string, authType int, bizA
 
 // ID 微信返回接口中各种类型字段
 type ID struct {
-	ID int `json:"id"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // AuthBaseInfo 授权的基本信息
@@ -292,9 +293,9 @@ type AuthorizerInfo struct {
 		OpenCard  string `json:"open_card"`
 		OpenShake string `json:"open_shake"`
 	}
-	Alias     string `json:"alias"`
-	QrcodeURL string `json:"qrcode_url"`
-
+	Alias           string                 `json:"alias"`
+	QrcodeURL       string                 `json:"qrcode_url"`
+	Signature       string                 `json:"signature"`
 	MiniProgramInfo *MiniProgramInfo       `json:"MiniProgramInfo"`
 	RegisterType    int                    `json:"register_type"`
 	AccountStatus   int                    `json:"account_status"`
@@ -303,8 +304,8 @@ type AuthorizerInfo struct {
 
 // AuthorizerBasicConfig 授权账号的基础配置结构体
 type AuthorizerBasicConfig struct {
-	IsPhoneConfigured bool `json:"isPhoneConfigured"`
-	IsEmailConfigured bool `json:"isEmailConfigured"`
+	IsPhoneConfigured bool `json:"is_phone_configured"`
+	IsEmailConfigured bool `json:"is_email_configured"`
 }
 
 // MiniProgramInfo 授权账号小程序配置 授权账号为小程序时存在
@@ -314,7 +315,7 @@ type MiniProgramInfo struct {
 		WsRequestDomain []string `json:"WsRequestDomain"`
 		UploadDomain    []string `json:"UploadDomain"`
 		DownloadDomain  []string `json:"DownloadDomain"`
-		BizDomain       []string `json:"BizDomain"`
+		TCPDomain       []string `json:"TCPDomain"`
 		UDPDomain       []string `json:"UDPDomain"`
 	} `json:"network"`
 	Categories []CategoriesInfo `json:"categories"`
@@ -322,8 +323,8 @@ type MiniProgramInfo struct {
 
 // CategoriesInfo 授权账号小程序配置的类目信息
 type CategoriesInfo struct {
-	First  string `wx:"first"`
-	Second string `wx:"second"`
+	First  string `json:"first"`
+	Second string `json:"second"`
 }
 
 // GetAuthrInfoContext 获取授权方的帐号基本信息
