@@ -1,6 +1,9 @@
 package officialaccount
 
 import (
+	originalContext "context"
+	"fmt"
+
 	"github.com/silenceper/wechat/v2/credential"
 	"github.com/silenceper/wechat/v2/officialaccount"
 	offConfig "github.com/silenceper/wechat/v2/officialaccount/config"
@@ -12,8 +15,48 @@ import (
 // OfficialAccount 代公众号实现业务
 type OfficialAccount struct {
 	// 授权的公众号的appID
-	appID string
+	AppID       string
+	openContext *opContext.Context
 	*officialaccount.OfficialAccount
+	authorizerRefreshToken string
+}
+
+// GetAccessToken 获取ak
+func (officialAccount *OfficialAccount) GetAccessToken() (string, error) {
+	ak, akErr := officialAccount.openContext.GetAuthrAccessToken(officialAccount.AppID)
+	if akErr == nil {
+		return ak, nil
+	}
+	if officialAccount.authorizerRefreshToken == "" {
+		return "", fmt.Errorf("please set the authorizer_refresh_token first")
+	}
+	akRes, akResErr := officialAccount.openContext.RefreshAuthrToken(officialAccount.AppID, officialAccount.authorizerRefreshToken)
+	if akResErr != nil {
+		return "", akResErr
+	}
+	return akRes.AccessToken, nil
+}
+
+// GetAccessTokenContext 利用ctx获取ak
+func (officialAccount *OfficialAccount) GetAccessTokenContext(ctx originalContext.Context) (string, error) {
+	ak, akErr := officialAccount.openContext.GetAuthrAccessTokenContext(ctx, officialAccount.AppID)
+	if akErr == nil {
+		return ak, nil
+	}
+	if officialAccount.authorizerRefreshToken == "" {
+		return "", fmt.Errorf("please set the authorizer_refresh_token first")
+	}
+	akRes, akResErr := officialAccount.openContext.RefreshAuthrTokenContext(ctx, officialAccount.AppID, officialAccount.authorizerRefreshToken)
+	if akResErr != nil {
+		return "", akResErr
+	}
+	return akRes.AccessToken, nil
+}
+
+// SetAuthorizerRefreshToken 设置代执操作业务授权账号authorizer_refresh_token
+func (officialAccount *OfficialAccount) SetAuthorizerRefreshToken(authorizerRefreshToken string) *OfficialAccount {
+	officialAccount.authorizerRefreshToken = authorizerRefreshToken
+	return officialAccount
 }
 
 // NewOfficialAccount 实例化
@@ -26,8 +69,9 @@ func NewOfficialAccount(opCtx *opContext.Context, appID string) *OfficialAccount
 		Cache:          opCtx.Cache,
 	})
 	// 设置获取access_token的函数
-	officialAccount.SetAccessTokenHandle(NewDefaultAuthrAccessToken(opCtx, appID))
-	return &OfficialAccount{appID: appID, OfficialAccount: officialAccount}
+	ret := &OfficialAccount{AppID: appID, OfficialAccount: officialAccount, openContext: opCtx}
+	officialAccount.SetAccessTokenHandle(ret)
+	return ret
 }
 
 // PlatformOauth 平台代发起oauth2网页授权
@@ -37,7 +81,7 @@ func (officialAccount *OfficialAccount) PlatformOauth() *oauth.Oauth {
 
 // PlatformJs 平台代获取js-sdk配置
 func (officialAccount *OfficialAccount) PlatformJs() *js.Js {
-	return js.NewJs(officialAccount.GetContext(), officialAccount.appID)
+	return js.NewJs(officialAccount.GetContext(), officialAccount.AppID)
 }
 
 // DefaultAuthrAccessToken 默认获取授权ak的方法
